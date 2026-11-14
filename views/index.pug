@@ -3,21 +3,47 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  ol
-  each val in todos
-    li
-      span= val.task + ' - '
-      if val.completed > 0
-        span Completed
-      else
-        span Not Completed
-      form(method='POST' action='/delete')
-        input(type='hidden', name='id', value=val.id)
-        button(type='submit') Delete
+
+  h2 Add a new task
+  form.create-form(method='POST' action='/create')
+    label(for='task') Task:
+    input(type='text', name='task', id='task', placeholder='Enter a new task...', required)
+    button(type='submit') Create Task
 
   hr
-  h2 Add a new task
-  form(method='POST' action='/create')
-    label(for='task') Task:
-    input(type='text', name='task', id='task', required)
-    button(type='submit') Create Task
+
+  h2 Tasks
+  if todos.length === 0
+    p No tasks yet. Add one above!
+  else
+    ol.todo-list
+      each val in todos
+        li.todo-item
+          .task-details
+            if val.completed > 0
+              span.task-text.completed-task= val.task
+              span.status-badge.status-done Completed
+            else
+              span.task-text= val.task
+              span.status-badge.status-pending Not Completed
+
+          .task-actions
+            //- Form to edit task description
+            form.inline-form(method='POST' action='/edit')
+              input(type='hidden', name='id', value=val.id)
+              input(type='text', name='task', value=val.task, required)
+              button.edit-btn(type='submit') Update
+
+            //- Form to toggle completion status
+            form.inline-form(method='POST' action='/toggle')
+              input(type='hidden', name='id', value=val.id)
+              input(type='hidden', name='completed', value=val.completed)
+              if val.completed > 0
+                button.undo-btn(type='submit') Mark Not Completed
+              else
+                button.complete-btn(type='submit') Mark Completed
+
+            //- Form to delete task
+            form.inline-form(method='POST' action='/delete')
+              input(type='hidden', name='id', value=val.id)
+              button.delete-btn(type='submit') Delete
